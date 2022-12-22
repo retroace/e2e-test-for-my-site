@@ -1,0 +1,81 @@
+{
+  "manifest_version": 3,
+  "name": "Test My Site",
+  "description": "Generated cypress code to test your site. Analyzes xhr events and much more.",
+  "version": "0.1",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "storage",
+    "webRequest",
+    "webNavigation",
+    "scripting",
+    "unlimitedStorage",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess",
+    "declarativeNetRequestFeedback"
+  ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*",
+    "file:///*"
+  ],
+
+  "author": "Rajesh Paudel",
+
+  "optional_permissions": [
+    "clipboardRead",
+    "clipboardWrite"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "tms.png"
+    },
+    "default_title": "Test My Site",
+    "default_popup": "popup/index.html"
+  },
+  "web_accessible_resources": [{
+    "resources": ["/browser/script.js"],
+    "matches": ["<all_urls>"]
+  }],  
+  "background": {
+    "service_worker": "/worker/index.js",
+    "type": "module"
+  },
+  "commands": {
+    "start-recording": {
+      "suggested_key": {
+        "default": "Alt+S",
+        "mac": "MacCtrl+S",
+        "linux": "Alt+S"
+      },
+      "description": "Start recording"
+    },
+    "stop-recording": {
+      "suggested_key": {
+        "default": "Alt+Y",
+        "mac": "MacCtrl+Y",
+        "linux": "Alt+Y"
+      },
+      "description": "Stop recording"
+    },
+    "toggle-recording": {
+      "suggested_key": {
+        "default": "Alt+T",
+        "mac": "MacCtrl+T",
+        "linux": "Alt+T"
+      },
+      "description": "Toggle recording"
+    },
+    "reset-recording": {
+      "suggested_key": {
+        "default": "Alt+Z",
+        "mac": "MacCtrl+Z",
+        "linux": "Alt+Z"
+      },
+      "description": "Reset recording"
+    }
+  }
+
+
+}

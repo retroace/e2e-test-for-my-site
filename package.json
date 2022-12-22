@@ -1,0 +1,35 @@
+{
+  "name": "testmysite",
+  "version": "1.0.0",
+  "description": "Generated cypress code to test your site. Analyzes xhr events and much more.",
+  "scripts": {
+    "start": "npx tsc --noEmit && npx parcel watch ./src/page/index.html ./src/popup/index.html ./src/worker/index.ts ./src/browser/index.ts ./src/browser/script.ts",
+    "build": "npx tsc --noEmit && npx parcel build ./src/page/index.html ./src/popup/index.html ./src/worker/index.ts ./src/browser/index.ts ./src/browser/script.ts",
+    "test": "jest --verbose",
+    "clean": "rm -rf dist .cache && mkdir dist && cp ./manifest.json dist && cp -r ./src/assets/. dist",
+    "tsc": "npx tsc --noEmit",
+    "rebuild": "npm run clean && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/chrome": "^0.0.204",
+    "@types/react": "^18.0.26",
+    "@typescript-eslint/eslint-plugin": "^2.3.3",
+    "@typescript-eslint/parser": "^2.3.3",
+    "chrome-types": "^0.1.155",
+    "eslint": "^6.5.1",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-typescript": "^5.0.0",
+    "parcel": "^2.8.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ts-jest": "^29.0.3",
+    "typescript": "^4.9.4"
+  },
+  "devDependencies": {
+    "@types/react-dom": "^18.0.9",
+    "process": "^0.11.10"
+  }
+}

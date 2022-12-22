@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "rootDir": "./src",
+        "jsx": "react-jsx",
+        "lib": [
+            "dom",
+            "es2015"
+        ],
+        "noEmit": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

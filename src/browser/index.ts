@@ -1,31 +1,30 @@
-import { BROWSER_CLIPBOARD_EVENT, BROWSER_EVENTS, BROWSER_SHORTCUT_COMMANDS, DATABASE_KEYS, XHR_CUSTOM_EVENT_NAME } from "../constants";
-import { getItem, setCurrentRecordingState } from "../Datasource";
+import { BROWSER_CLIPBOARD_EVENT, BROWSER_EVENTS, BROWSER_RECORDING_STATE, BROWSER_SHORTCUT_COMMANDS, DATABASE_KEYS, XHR_CUSTOM_EVENT_NAME } from "../constants";
+import { getItem } from "../Datasource";
 import { BROWSER_MESSAGE } from "../index.d";
 import { parseClipboardEvent, parseDomEvent } from "./event";
 
-let port: chrome.runtime.Port;
+let tabId: number;
 
 async function getCurrentRecordingState() {
     let data = await getItem<number[]>(DATABASE_KEYS.RECORDING)
     data = Array.isArray(data) ? data : []
-    return data.includes(port?.sender?.tab?.id) 
+    return data.includes(tabId) 
         
 }
 
 
 async function parseEvent(e: Event) {
-    const isRecording = await getCurrentRecordingState()
-    if (!isRecording) return
+    console.log(`parsing`, e.type)
     if (e.target === document) return
-
+    if((e.target as HTMLElement).tagName === undefined) return
+    console.log(e.type)
     let data;
-    console.log(e.type, BROWSER_CLIPBOARD_EVENT)
     if ((BROWSER_CLIPBOARD_EVENT as string[]).includes(e.type)) {
         data = await parseClipboardEvent(e)
     } else {
         data = await parseDomEvent(e)
     }
-    port.postMessage(data)
+    chrome.runtime.sendMessage(data)
 }
 
 /**
@@ -35,8 +34,8 @@ function setupDomListeners() {
     const eventOption = {
         capture: true,
         passive: true,
-    }
-    BROWSER_EVENTS.map(e => document.removeEventListener(e, parseEvent, eventOption))
+    };
+    console.log(`adding Event Listener FOR`, BROWSER_EVENTS)
     BROWSER_EVENTS.map(e => document.addEventListener(e, parseEvent, eventOption))
 }
 
@@ -62,38 +61,39 @@ function teardownDOMListeners(): void {
     BROWSER_EVENTS.map(e => document.removeEventListener(e, parseEvent, { capture: true }))
 }
 
-
-function handleMessage(message: BROWSER_MESSAGE, port: chrome.runtime.Port) {
+function handleMessage(message: BROWSER_MESSAGE, sender: chrome.runtime.MessageSender, sendResponse: Function) {
+    console.log(`messages`,message)
     switch (message.type) {
         case BROWSER_SHORTCUT_COMMANDS.INJECT_SCRIPT:
+            sendResponse && sendResponse({ type: BROWSER_RECORDING_STATE.DOM_RECORDING })
+            setupXhrListeners()
+            setupDomListeners()
             break
+            
         case BROWSER_SHORTCUT_COMMANDS.STOP_RECORDING:
-            if (port.sender?.tab?.id === undefined) { return }
-            setCurrentRecordingState(false, port.sender.tab.id)
             teardownDOMListeners()
-            break
+            tabId = (message as any).tabId as number
+        break
 
         case BROWSER_SHORTCUT_COMMANDS.START_RECORDING:
             setupXhrListeners()
-            break
+            setupDomListeners()
+        break
+
         default:
             break
     }
+    return true
 }
 
 function initialize(): void {
-    port = chrome.runtime.connect({ name: window.location.hostname })
-
-    port.onDisconnect.addListener(teardownDOMListeners)
-    port.onMessage.addListener(handleMessage)
+    chrome.runtime.onMessage.addListener(handleMessage)
 
     window.addEventListener(XHR_CUSTOM_EVENT_NAME, async function (evt) {
         const isRecording = await getCurrentRecordingState()
         if (!isRecording) { return false }
-        port && port.postMessage((evt as any).detail);
+        chrome.runtime.sendMessage((evt as any).detail);
     }, false);
-
-    setupDomListeners()
 }
 
 initialize()

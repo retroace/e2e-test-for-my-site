@@ -25,7 +25,7 @@ export async function getItem<T = any>(key: string) {
 }
 
 
-export const getCurrentTab = () => new Promise(resolve => (
+export const getCurrentTab = () => new Promise<chrome.tabs.Tab[]>(resolve => (
     chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
       resolve(tabs)
     })

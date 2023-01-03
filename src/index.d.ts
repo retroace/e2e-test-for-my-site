@@ -21,6 +21,7 @@ export interface MESSAGE_MODAL {
     type: 'xhr' | 'dom',
     action: BROWSER_INPUT_EVENTS,
     value: string | null,
+    extra?: any,
     url: string,
     info: DOM_EVENT_MODAL | XHR_MESSAGE_MODAL,
     timestamp: number
@@ -28,6 +29,7 @@ export interface MESSAGE_MODAL {
 
 export interface XHR_MESSAGE_MODAL {
     reqBody: string,
+    method: string,
     resBody: string,
     url: string,
     reqHeader: string[],

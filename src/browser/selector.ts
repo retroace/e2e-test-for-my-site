@@ -1,7 +1,10 @@
-export function getSelectorForElement(el: Element): string {
+export function getSelectorForElement(el: Element): {default: string, all: string[]} {
     const selector = extractAllSelectorsToParent(el, [])
 
-    return getUniqueSelectors(selector)
+    return {
+        default: getUniqueSelectors(selector),
+        all: selector,
+    }
 }
 
 
@@ -15,7 +18,7 @@ interface ELEMENT_SELECTORS {
 }
 
 function extractAllSelectorsToParent(el: Element, selectors: ELEMENT_SELECTORS[]) {
-    if(el.tagName === 'BODY') return selectors
+    if(el === null || el.tagName === 'BODY') return selectors
     const data: ELEMENT_SELECTORS = {
         tagName: el.tagName,
         class: el.className,

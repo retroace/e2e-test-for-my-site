@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import CyGenerator from "./CyGenerator"
 
 export default function Page() {
     const [data, setData] = useState<{ [key: string]: any }>({})
@@ -29,6 +30,9 @@ export default function Page() {
             </div>
             
             <div>
+                <div>
+                    <CyGenerator items={activeTabData} />
+                </div>
                 {activeTabData.map((item, i) => (
                     <div style={{ borderTop: '1px solid #e3e3e3', borderBottom: '1px solid #e3e3e3' }} key={item.timestamp}>
                         <p>Type: {item.type}</p>

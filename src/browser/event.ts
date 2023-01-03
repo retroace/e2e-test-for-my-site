@@ -13,13 +13,14 @@ export function parseDomEvent(e: Event) {
             action: e.type as BROWSER_INPUT_EVENTS,
             type: 'dom',
             url: location.href,
-            value: '',
+            value: (e as any)?.key,
+            extra: (e as KeyboardEvent)?.keyCode,
             info: {
                 action: '',
                 tagInfo: {},
                 url: location.href,
-                selector,
-                possibleSelectors: [], 
+                selector: selector.default,
+                possibleSelectors: selector.all, 
                 tag: (e.target as Element).tagName,
                 value: (e.target as HTMLInputElement).value,
                 mouse: [(e as PointerEvent)?.x, (e as PointerEvent)?.y],
@@ -28,6 +29,7 @@ export function parseDomEvent(e: Event) {
                     height: window.innerHeight,
                 },
                 specialKeys: {
+                    BACKSPACE: (e as KeyboardEvent)?.keyCode == 8,
                     SHIFT: (e as KeyboardEvent).shiftKey || false,
                     CTRL: (e as KeyboardEvent).ctrlKey || false,
                     ALT: (e as KeyboardEvent).altKey || false

@@ -29,6 +29,11 @@ export enum DATABASE_KEYS {
 
 export const BROWSER_EVENTS  = [ ...BROWSER_CLIPBOARD_EVENT, ...BROWSER_INPUT_EVENTS ]
 
+export enum BROWSER_RECORDING_STATE {
+    XHR_RECORDING = 'xhr-recording',
+    DOM_RECORDING = 'dom-recording',
+}
+
 export enum BROWSER_SHORTCUT_COMMANDS {
     INJECT_SCRIPT = 'inject-script',
     START_RECORDING = 'start-recording',

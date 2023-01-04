@@ -41,7 +41,7 @@ export function parseDomEvent(e: Event) {
         if ((e.target as HTMLAnchorElement).hasAttribute('href')) parsedEvent.value = (e.target as HTMLAnchorElement).href;
 
         if (["INPUT", "SELECT", "TEXTAREA"].includes((parsedEvent.info as DOM_EVENT_MODAL).tag)) {
-            parsedEvent.value = (e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).value
+            (parsedEvent.info as DOM_EVENT_MODAL).value = (e.target as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement).value
         }
         
         resolve(parsedEvent);            

@@ -6,15 +6,19 @@ function getKeyValueFromMessageModal(item: MESSAGE_MODAL) {
     let val = ''
     const keyInfo = item.info as DOM_EVENT_MODAL
     if(keyInfo.specialKeys.ALT) {
-        val += '{alt}'
+        return '{alt}'
     }
     if(keyInfo.specialKeys.CTRL) {
-        val += '{ctrl}'
+        return '{ctrl}'
     }
     if(keyInfo.specialKeys.SHIFT) {
-        val += '{shift}'
+        return '{shift}'
     }
     
+    if(item.extra === 37) {
+        return '{leftArrow}'
+    }
+
     if(item.extra === 37) {
         return '{leftArrow}'
     }
@@ -37,7 +41,7 @@ function getKeyValueFromMessageModal(item: MESSAGE_MODAL) {
         return '{backspace}'
     }
 
-    return `${val}${item.value}`
+    return `${val}${item.value || (item.info as DOM_EVENT_MODAL)?.value}`
 }
 
 interface OptimizedCyFormat {
@@ -58,21 +62,22 @@ export default function CyGenerator({ items }: { items: MESSAGE_MODAL[] }) {
     const getCypressCode = () => {
         let newData: OptimizedCyFormat[] = []
         let currentDataIterator = 0
+        console.log(newItems)
         for (let i = 0; i < newItems.length; i++) {
             const currentData = items[i]
             if (currentData.type === 'xhr') {
                 newData[currentDataIterator] = {
                     type: 'xhr',
                     selector: (currentData.info as XHR_MESSAGE_MODAL).method,
-                    value: currentData.url
+                    value: (currentData.info as XHR_MESSAGE_MODAL).url
                 }
                 currentDataIterator++
                 continue
             }
 
-            if (newData[currentDataIterator] && 
-                newData[currentDataIterator].type !== currentData.action && 
-                (currentData.info as DOM_EVENT_MODAL).selector !== newData[currentDataIterator].selector) {
+            if (newData[currentDataIterator] && ( 
+                newData[currentDataIterator].type !== currentData.action || 
+                (currentData.info as DOM_EVENT_MODAL).selector !== newData[currentDataIterator].selector)) {
                 currentDataIterator++
             }
             
@@ -88,10 +93,11 @@ export default function CyGenerator({ items }: { items: MESSAGE_MODAL[] }) {
             newData[currentDataIterator].value += getKeyValueFromMessageModal(currentData)
         }
         setCodeData(newData)
+        console.log(newData)
     }
 
     const getXHR = (item: OptimizedCyFormat) => {
-        return `cy.spy("${item.value}", ${item.selector}).as('alias1')`
+        return `cy.spy("${item.value}", "${item.selector}").as('alias1')`
     }
 
     const getDom = (item: OptimizedCyFormat) => {

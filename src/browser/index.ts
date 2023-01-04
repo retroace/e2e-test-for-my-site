@@ -14,10 +14,9 @@ async function getCurrentRecordingState() {
 
 
 async function parseEvent(e: Event) {
-    console.log(`parsing`, e.type)
     if (e.target === document) return
     if((e.target as HTMLElement).tagName === undefined) return
-    console.log(e.type)
+    
     let data;
     if ((BROWSER_CLIPBOARD_EVENT as string[]).includes(e.type)) {
         data = await parseClipboardEvent(e)

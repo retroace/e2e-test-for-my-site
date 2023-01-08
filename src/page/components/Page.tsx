@@ -19,6 +19,12 @@ export default function Page() {
 
     return (
         <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <style>
+                {`
+                    ul { margin: 10px 0; padding: 0; }
+                    ul > li { list-style: none; padding: 10px; border: 1px solid #e3e3e3; margin: 10px 0; }
+                `}
+            </style>
             <div style={{ minWidth: 250, maxWidth: 300, paddingRight: 10 }}>
                 {Object.keys(data).map(i => (
                     <div style={{ width: '100%', }} key={i}>
@@ -39,7 +45,7 @@ export default function Page() {
                         <p>Selector: {item.selector}</p>
                         <p>URL: {item.info?.url}</p>
                         <pre>
-                            {JSON.stringify(item)}
+                            {JSON.stringify(item, null, 2)}
                         </pre>
                     </div>
                 ))}

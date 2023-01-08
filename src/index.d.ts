@@ -4,6 +4,8 @@ export interface BROWSER_MESSAGE {
     type: string
 }
 
+export type EventType = 'browser' | 'extension'
+
 
 export enum BROWSER_INPUT_EVENTS { 
     CLICK = 'click',
@@ -15,6 +17,14 @@ export enum BROWSER_INPUT_EVENTS {
     SUBMIT = 'submit',
     SELECTION_CHANGE = 'selectionchange',
     XHR = 'xhr'
+}
+
+export interface TAB_MODAL {
+    type: 'urlchange',
+    url: string,
+    status?: string, 
+    title?: string,
+    timestamp: number
 }
 
 export interface MESSAGE_MODAL {

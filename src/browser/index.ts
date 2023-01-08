@@ -34,7 +34,6 @@ function setupDomListeners() {
         capture: true,
         passive: true,
     };
-    console.log(`adding Event Listener FOR`, BROWSER_EVENTS)
     BROWSER_EVENTS.map(e => document.addEventListener(e, parseEvent, eventOption))
 }
 
@@ -61,7 +60,6 @@ function teardownDOMListeners(): void {
 }
 
 function handleMessage(message: BROWSER_MESSAGE, sender: chrome.runtime.MessageSender, sendResponse: Function) {
-    console.log(`messages`,message)
     switch (message.type) {
         case BROWSER_SHORTCUT_COMMANDS.INJECT_SCRIPT:
             sendResponse && sendResponse({ type: BROWSER_RECORDING_STATE.DOM_RECORDING })

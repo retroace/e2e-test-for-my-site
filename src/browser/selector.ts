@@ -15,11 +15,14 @@ interface ELEMENT_SELECTORS {
     dataCy: string,
     dataTest: string,
     dataTestId: string,
+    index: number,
 }
 
 function extractAllSelectorsToParent(el: Element, selectors: ELEMENT_SELECTORS[]) {
     if(el === null || el.tagName === 'BODY') return selectors
+    const currentSelectorIndex = Array.from(el?.parentNode?.children || []).indexOf(el) + 1
     const data: ELEMENT_SELECTORS = {
+        index: currentSelectorIndex,
         tagName: el.tagName,
         class: el.className,
         id: el.id,
@@ -34,34 +37,33 @@ function extractAllSelectorsToParent(el: Element, selectors: ELEMENT_SELECTORS[]
 // Automatically follows best practice from cypress
 // https://docs.cypress.io/guides/references/best-practices#How-It-Works
 function getUniqueSelectors(selectors: ELEMENT_SELECTORS[]): string {
-    let xpath = ''
+    let xpath = []
     for(const selector of selectors) {
-        xpath += ' '
         if(selector.dataCy && selector.dataCy.length) {
-            xpath += `[data-cy=${selector.dataCy}]`
+            xpath.push(`[data-cy=${selector.dataCy}]`)
             break;
         }
 
         if(selector.dataTest && selector.dataTest.length) {
-            xpath += `[data-test=${selector.dataTest}]`
+            xpath.push(`[data-test=${selector.dataTest}]`)
             break;
         }
 
         if(selector.dataTestId && selector.dataTestId.length) {
-            xpath += `[data-testid=${selector.dataTestId}]`
+            xpath.push(`[data-testid=${selector.dataTestId}]`)
             break;
         }
         if(selector.id && selector.id.length) {
-            xpath += `#${selector.id}`
+            xpath.push(`#${selector.id}`)
             break;
         }
         let tagName = String(selector.tagName).toLocaleLowerCase()
         if(selector.class && selector.class.length) {
-            xpath += `${tagName}.${selector.class.split(" ").join('.')}`
+            xpath.push(`${tagName}:nth-child(${selector.index})`)
             continue;
         }
 
-        xpath += tagName
+        xpath.push(tagName)
     }
-    return xpath; 
+    return xpath.reverse().join(' '); 
 }

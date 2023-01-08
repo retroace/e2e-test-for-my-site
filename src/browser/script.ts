@@ -1,4 +1,5 @@
 import { BROWSER_INPUT_EVENTS, MESSAGE_MODAL, XHR_MESSAGE_MODAL } from "../index.d";
+import { analyzeXhrEvent } from "./xhrAnalyzer";
 
 (() => {
     var XHR = XMLHttpRequest.prototype;
@@ -19,7 +20,9 @@ import { BROWSER_INPUT_EVENTS, MESSAGE_MODAL, XHR_MESSAGE_MODAL } from "../index
     XHR.setRequestHeader = function (header, value) {
         this._requestHeaders[header] = value;
         return setRequestHeader.apply(this, arguments);
-    };
+    }
+
+    
     
     XMLHttpRequest.prototype.send = function (postData: any) {
         this.addEventListener('load', function (e) {
@@ -32,11 +35,16 @@ import { BROWSER_INPUT_EVENTS, MESSAGE_MODAL, XHR_MESSAGE_MODAL } from "../index
                     url: this._url,
                     method: this._method,
                     reqHeader: this._requestHeaders,
+                    resHeader: this._requestHeaders,
                     reqBody: postData,
                     resBody: String(e.target.responseText).substring(0, 500000),
+                    finishedTime: +(new Date())
                 } as XHR_MESSAGE_MODAL,
                 timestamp: this._startTime,
             }
+            window.setTimeout(() => {
+                analyzeXhrEvent(e.target.responseText)
+            }, 1000)
 
             window.dispatchEvent(new CustomEvent('testmysitexhr', { detail: data }))
         })

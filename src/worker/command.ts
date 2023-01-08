@@ -1,33 +1,50 @@
-import { BROWSER_SHORTCUT_COMMANDS, DATABASE_KEYS } from "../constants"
-import { getItem, setCurrentRecordingState } from "../Datasource"
+import { COMMAND } from ".."
+import { BROWSER_SHORTCUT_COMMANDS } from "../constants"
+import { getCurrentTab } from "../Datasource"
+import { isRecordingOnTab } from "./datasource"
+import { injectScriptIfNotInjected, openCodeManagementPage, startRecording, stopRecording } from "./helper"
 
 
-export function startRecording(tabId: number, cb?: Function) {
-  setCurrentRecordingState(true, tabId)
-  changeIcon(tabId, true)
-  cb && cb()
-  chrome.tabs.sendMessage(tabId, { type: BROWSER_SHORTCUT_COMMANDS.START_RECORDING, tabId })
+
+export async function onShortcutsKeys(detail) {
+  getCurrentTab().then(async tab => {
+      let newDetail: COMMAND = {
+          tab: Array.isArray(tab) ? tab[0] : tab as chrome.tabs.Tab,
+          command: detail
+      }
+      let tabId = newDetail.tab.id
+      const isRecording = await isRecordingOnTab(tabId)
+      switch (detail) {
+          case BROWSER_SHORTCUT_COMMANDS.TOGGLE_RECORDING:
+              if (isRecording) {
+                  stopRecording(tabId)
+              } else {
+                  startRecording(tabId, () => {
+                      injectScriptIfNotInjected(newDetail.tab)
+                  })
+              }
+              break
+
+          case BROWSER_SHORTCUT_COMMANDS.START_RECORDING:
+              startRecording(tabId, () => {
+                  injectScriptIfNotInjected(newDetail.tab)
+              })
+              break
+
+          case BROWSER_SHORTCUT_COMMANDS.STOP_RECORDING:
+              stopRecording(tabId, () => {
+                  openCodeManagementPage()
+              })
+              break
+
+          case BROWSER_SHORTCUT_COMMANDS.RESET_RECORDING:
+              stopRecording(tabId)
+              break
+
+          default:
+              break
+      }
+  })
+  return true
 }
 
-
-export function stopRecording(tabId: number, cb?: Function) {
-  setCurrentRecordingState(false, tabId)
-  changeIcon(tabId, false)
-  chrome.tabs.sendMessage(tabId, { type: BROWSER_SHORTCUT_COMMANDS.STOP_RECORDING, tabId})
-  cb && cb()
-}
-
-export function changeIcon(tabId: number, state?: boolean) {
-  if (state === undefined) {
-    getItem(DATABASE_KEYS.RECORDING).then(dbKeys => {
-      state = dbKeys && Array.isArray(dbKeys) && dbKeys.includes(tabId)
-      const icon = state ? '/tms-rec.png' : '/tms.png'
-      chrome.action.setIcon({ path: icon, tabId });
-    })
-    return false
-  }
-
-  const icon = state ? '/tms-rec.png' : '/tms.png'
-  chrome.action.setIcon({ path: icon, tabId });
-  return false
-}

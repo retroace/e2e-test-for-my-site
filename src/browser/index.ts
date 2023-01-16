@@ -1,10 +1,10 @@
 import { BROWSER_CLIPBOARD_EVENT, BROWSER_EVENTS, BROWSER_RECORDING_STATE, BROWSER_SHORTCUT_COMMANDS, DATABASE_KEYS, XHR_CUSTOM_EVENT_NAME } from "../constants";
 import { getItem } from "../Datasource";
 import { BROWSER_MESSAGE } from "../index.d";
-import { parseClipboardEvent, parseDomEvent } from "./event";
+import { parseAssertionsEvent, parseClipboardEvent, parseDomEvent } from "./event";
 
 let tabId: number;
-
+let contextItem: any
 async function getCurrentRecordingState() {
     let data = await getItem<number[]>(DATABASE_KEYS.RECORDING)
     data = Array.isArray(data) ? data : []
@@ -77,6 +77,13 @@ function handleMessage(message: BROWSER_MESSAGE, sender: chrome.runtime.MessageS
             setupDomListeners()
         break
 
+        case BROWSER_SHORTCUT_COMMANDS.CONTEXT_MENU:
+            if(!contextItem) return
+
+            const msg = parseAssertionsEvent(contextItem as HTMLElement)
+            chrome.runtime.sendMessage(msg)
+        break
+
         default:
             break
     }
@@ -91,6 +98,12 @@ function initialize(): void {
         if (!isRecording) { return false }
         chrome.runtime.sendMessage((evt as any).detail);
     }, false);
+    
+    window.addEventListener("contextmenu", function(event){
+        console.log(`window context`, event)
+        contextItem = event.target
+    }, true);
+
 }
 
 initialize()

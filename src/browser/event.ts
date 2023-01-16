@@ -6,6 +6,40 @@ export function parseClipboardEvent(e: Event) {
 }
 
 
+export function parseAssertionsEvent(e: HTMLElement) {
+    let selector = getSelectorForElement(e as Element);
+    return {
+        action: 'click',
+        type: 'assert',
+        url: location.href,
+        value: (e as any)?.key,
+        info: {
+            action: 'exist',
+            tagInfo: {
+                innerText: e.innerText.substring(0, 7000),
+                href: (e as HTMLAnchorElement).href,
+                outerHTML: e.outerHTML
+            },
+            selector: selector.default,
+            possibleSelectors: selector.all, 
+            tag: (e as Element).tagName,
+            value: (e as HTMLInputElement).value,
+            mouse: [null, null],
+            viewport: {
+                width: window.innerWidth,
+                height: window.innerHeight,
+            },
+            specialKeys: {
+                BACKSPACE: false,
+                SHIFT: false,
+                CTRL: false,
+                ALT: false
+            }
+        } as DOM_EVENT_MODAL,
+        timestamp: +(new Date())
+    }
+}
+
 export function parseDomEvent(e: Event) {
     return new Promise(resolve => {
         let selector = getSelectorForElement(e.target as Element);

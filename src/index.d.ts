@@ -28,7 +28,7 @@ export interface TAB_MODAL {
 }
 
 export interface MESSAGE_MODAL {
-    type: 'xhr' | 'dom',
+    type: 'xhr' | 'dom' | 'assert',
     action: BROWSER_INPUT_EVENTS,
     value: string | null,
     extra?: any,
@@ -38,6 +38,7 @@ export interface MESSAGE_MODAL {
 }
 
 export interface XHR_MESSAGE_MODAL {
+    finishedTime: number,
     reqBody: string,
     method: string,
     resBody: string,

@@ -6,7 +6,7 @@
     "start": "npx tsc --noEmit && npx parcel watch ./src/page/index.html ./src/popup/index.html ./src/worker/index.ts ./src/browser/index.ts ./src/browser/script.ts",
     "build": "npx tsc --noEmit && npx parcel build ./src/page/index.html ./src/popup/index.html ./src/worker/index.ts ./src/browser/index.ts ./src/browser/script.ts",
     "test": "jest --verbose",
-    "clean": "rm -rf dist .cache && mkdir dist && cp ./manifest.json dist && cp -r ./src/assets/. dist",
+    "clean": "rm -rf dist .cache && mkdir dist && cp ./src/manifest.json dist && cp -r ./src/assets/. dist",
     "tsc": "npx tsc --noEmit",
     "rebuild": "npm run clean && npm run build"
   },

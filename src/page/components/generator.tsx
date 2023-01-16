@@ -1,3 +1,4 @@
+import { Children } from "react"
 import { BROWSER_INPUT_EVENTS } from "../../index.d"
 import { CondensedCyFormat, GeneratorFormat } from "./condensor"
 
@@ -8,29 +9,34 @@ const getXHRRequest = (item) => {
     return `cy.intercept("${item.selector}", "${url}").as('alias${alias}')`
 }
 
-function generateParsedResponseCode(parsedResponse: null | { [key: string]: any }, keySuffix: string) {
-    if (parsedResponse === null) return ''
+interface CodeAst {
+    code: string,
+    children?: Array<CodeAst>,
+    scopeVar?: string
+}
+
+function generateParsedResponseCode(parsedResponse: null | { [key: string]: any }, keySuffix: string): CodeAst {
+    if (parsedResponse === null) return { code: '' }
 
     if (typeof parsedResponse === 'object' && !Array.isArray(parsedResponse)) {
-        let str = `expect(${keySuffix}).to.be.an('object') \n`;
-        str += Object.keys(parsedResponse).map(key => 
-            generateParsedResponseCode(parsedResponse[key], `${keySuffix}.${key}`)
-        ).join('\n')
-        return str
+        return {
+            code: `expect(${keySuffix}).to.be.an('object')`,
+            children: Object.keys(parsedResponse).map(key => generateParsedResponseCode(parsedResponse[key], `${keySuffix}.${key}`))
+        }
     }
 
-    if(Array.isArray(parsedResponse)) {
-        return `expect(${keySuffix}).to.be.an('array') \n`
+    if (Array.isArray(parsedResponse)) {
+        return { code: `expect(${keySuffix}).to.be.an('array')` }
     }
 
-    return `expect(${keySuffix}).to.be.an('${typeof parsedResponse}') \n`
+    return { code: `expect(${keySuffix}).to.be.an('${typeof parsedResponse}')` }
 }
 
 
 const getXHRResponse = (item: CondensedCyFormat) => {
     const url = item.value[0]?.url
     const alias = item.value[0]?.finishedTime
-   
+
     return `cy.wait('@alias${alias}').should((first) => {
         ${assertOnResponse(item, 'first')}
     })`
@@ -44,7 +50,7 @@ const getXhrVarName = (url: string) => {
     return seg.slice(seg.length - 2).join('')
 }
 
-const assertOnResponse = (item: CondensedCyFormat, scopeName: string, reqAlias?: string, resAlias?: string) => {
+const assertOnResponse = (item: CondensedCyFormat, scopeName: string, reqAlias?: string, resAlias?: string): CodeAst[] => {
     let parsedResponse = item.value[0].resBody
     let request = reqAlias ? reqAlias : 'request'
     let response = resAlias ? resAlias : 'response'
@@ -53,31 +59,39 @@ const assertOnResponse = (item: CondensedCyFormat, scopeName: string, reqAlias?:
     } catch (error) {
         parsedResponse = null
     }
-    return ` 
-        const {request: ${request}, response: ${response}} = ${scopeName}
-        expect(${response}.statusCode).to.eq(200)
-        expect(${response}).to.have.property('headers')
-        ${generateParsedResponseCode(parsedResponse, `${response}.body`)}
-    `
+
+    return [
+        { code: `const {request: ${request}, response: ${response}} = ${scopeName}` },
+        { code: `expect(${response}.statusCode).to.eq(200)` },
+        { code: `expect(${response}).to.have.property('headers')` },
+        generateParsedResponseCode(parsedResponse, `${response}.body`),
+    ]
 }
 
 const getMultipleXhrResponse = (item: GeneratorFormat): string => {
     const aliasKeys = item.merged.map(i => i.timestamp)
     const aliasVarName = item.merged.map(i => getXhrVarName(i.value[0].url))
-    console.log(item, aliasKeys)
+    const codeAsts = aliasVarName.map((key, index) => assertOnResponse(item.merged[index], String(key), `${key}Req`, `${key}Res`)).flatMap(i => i)
+
+
+    const getCodeFromAst = (ast: CodeAst): string => {
+        let code = ast.code
+        code += ast.children ? ast.children.map(i => getCodeFromAst(i)).join('\n') : ''
+        return code
+    }
 
     return `cy.wait(['${aliasKeys.map(i => `@alias${i}`).join("','")}']).should(multipleXhr => {
         const [${aliasVarName.join(",")}] = multipleXhr
-        ${aliasVarName.map((key,index) => assertOnResponse(item.merged[index], String(key), `${key}Req`, `${key}Res`)).join('\n')}
+        ${codeAsts.map(i => getCodeFromAst(i)).join('\n')}
     })`
 }
 
 
-export const cypressCodeGenerator = (item: GeneratorFormat): {code: string, timestamp: number} => {
+export const cypressCodeGenerator = (item: GeneratorFormat): { code: string, timestamp: number } => {
     let eventType = item.type
-    if(item.generatorType === 'merged') return { code: getMultipleXhrResponse(item), timestamp: item.value[0].timestamp }
+    if (item.generatorType === 'merged') return { code: getMultipleXhrResponse(item), timestamp: item.value[0].timestamp }
     let timestamp = item.timestamp
-    if (eventType === 'urlchange') return {code: `cy.visit("${item.value}")`, timestamp}
+    if (eventType === 'urlchange') return { code: `cy.visit("${item.value}")`, timestamp }
 
     if (eventType === 'xhrrequest') return { code: getXHRRequest(item), timestamp }
 
@@ -100,9 +114,9 @@ export const cypressCodeGenerator = (item: GeneratorFormat): {code: string, time
         }, []).map(i => `type("${i}")`).join('.')
         return { code, timestamp }
     }
-    
+
     eventType = eventType === 'blur' && item.tagName === 'A' ? BROWSER_INPUT_EVENTS.CLICK : eventType
-    
+
     if (eventType === 'change') {
         return { code: selector + item.value.map(i => `click()`).join('.'), timestamp }
     }

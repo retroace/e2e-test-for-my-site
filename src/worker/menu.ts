@@ -1,39 +1,26 @@
+
+// Code generator 
+
+import { BROWSER_SHORTCUT_COMMANDS } from "../constants";
+
+// Generate selectors in a variable if they need it
+const extensionName = 'test-my-site'
+
+function initializeListeners() {
+    chrome.contextMenus.onClicked.addListener((info, tab) => {
+        chrome.tabs.sendMessage(tab.id, { type: BROWSER_SHORTCUT_COMMANDS.CONTEXT_MENU, tabId: tab.id})
+    })
+}
+
 // USe this to create context menu
-// chrome.contextMenus.create({
-//     id: 'assertions-test-my-site',
-//     type: 'normal',
-//     visible: true,
-//     title: "Assetions",
-//     contexts: ["all"],
-// });
+export function initializeContextMenu() {
+    chrome.contextMenus.create({
+        id: `${extensionName}-assert`,
+        type: 'normal',
+        visible: true,
+        title: "Assetions",
+        contexts: ["all"],
+    });
 
-// chrome.contextMenus.create({
-//     contexts: ['all'],
-//     id: 'assertions-test-my-site-exists', "title": "Exists", "parentId": 'assertions-test-my-site'
-// }, function () {
-//     if (chrome.extension.lastError) {
-//         console.log("Got expected error: " + chrome.extension.lastError.message);
-//     }
-//     console.log(`exists`)
-// });
-
-// chrome.contextMenus.create({
-//     contexts: ['all'],
-//     id: 'assertions-test-my-site-have-attr', "title": "Have Attribute", "parentId": 'assertions-test-my-site'
-// }, function () {
-//     if (chrome.extension.lastError) {
-//         console.log("Got expected error: " + chrome.extension.lastError.message);
-//     }
-//     console.log(`Have Attribute`)
-// });
-
-// chrome.contextMenus.create({
-//     contexts: ['all'],
-//     id: 'assertions-test-my-site-have-text', "title": "Have Text", "parentId": 'assertions-test-my-site'
-// }, function () {
-//     if (chrome.extension.lastError) {
-//         console.log("Got expected error: " + chrome.extension.lastError.message);
-//     }
-//     console.log(`Have Text`)
-// });
-// u
+    initializeListeners()
+}

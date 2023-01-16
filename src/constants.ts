@@ -40,4 +40,5 @@ export enum BROWSER_SHORTCUT_COMMANDS {
     TOGGLE_RECORDING = 'toggle-recording',
     STOP_RECORDING = 'stop-recording',
     RESET_RECORDING = 'reset-recording',
+    CONTEXT_MENU = 'context-menu',
 }

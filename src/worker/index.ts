@@ -1,9 +1,6 @@
 import { onShortcutsKeys } from "./command";
 import { onMessageReceived, onTabNavigation, onTabRemoved, onTabUpdate } from "./lifecycle";
-
-
-
-
+import { initializeContextMenu } from "./menu";
 
 /**
  * Initializes the extension.
@@ -16,7 +13,7 @@ function setup(): void {
   chrome.tabs.onUpdated.addListener(onTabUpdate)
   chrome.tabs.onRemoved.addListener(onTabRemoved)
  
-
+  initializeContextMenu()
 }
 
 setup();

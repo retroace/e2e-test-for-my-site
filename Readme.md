@@ -1,4 +1,4 @@
-#TEST MY SITE
+## TEST MY SITE
 
 A cypress code generator that helps to write your cypress code for you. Heping you to test your site.
 It detects api calls for spa, events thrown and even tries to add drag and drop code for you. It even validates your
